@@ -180,8 +180,8 @@ Q.use = (name: string, props?: any): QCollection => {
   return factory(props);
 };
 
-Q.mount = (name: string, target: string | Node): QCollection => {
-  const collection = Q.use(name);
+Q.mount = (name: string, target: string | Node, props?: any): QCollection => {
+  const collection = Q.use(name, props);
   collection.appendTo(target);
   return collection;
 };

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryFast — Official Documentation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #0070f3;
+            --bg: #ffffff;
+            --text: #000000;
+            --secondary-text: #444;
+            --border: #ddd;
+            --card-bg: #f8f9fa;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --text: #ffffff;
+                --secondary-text: #ccc;
+                --border: #333;
+                --card-bg: #111;
+            }
+        }
+        body { font-family: "Inter", sans-serif; margin: 0; background: var(--bg); color: var(--text); line-height: 1.6; }
+        
+        nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: var(--bg); border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; box-sizing: border-box; }
+        .logo { font-weight: 900; font-size: 1.5rem; color: var(--primary); text-decoration: none; }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { text-decoration: none; color: var(--text); font-weight: 700; cursor: pointer; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+
+        .container { max-width: 1100px; margin: 100px auto 0; padding: 40px 20px; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        h1 { font-size: 5rem; font-weight: 900; margin: 0; letter-spacing: -3px; }
+        h2 { font-size: 3rem; font-weight: 900; border-bottom: 4px solid var(--primary); padding-bottom: 10px; margin-top: 80px; }
+        h3 { font-size: 2rem; font-weight: 800; color: var(--primary); }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        
+        .example-box { border: 2px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--bg); }
+        .example-header { padding: 12px 20px; background: var(--border); font-weight: 900; }
+        .example-content { padding: 30px; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+
+        .method-card { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; border-radius: 12px; margin: 30px 0; }
+        .method-name { font-family: monospace; font-size: 1.5rem; font-weight: bold; color: #d63384; }
+
+        /* Todo App Styles */
+        .todo-app { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: var(--bg); color: var(--text); }
+        .todo-input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; background: var(--bg); color: var(--text); }
+        .todo-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); }
+        .todo-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="#" class="logo" onclick="showSection('home')">📘 QueryFast Official</a>
+    <div class="nav-links">
+        <a onclick="showSection('home')" id="link-home">Home</a>
+        <a onclick="showSection('learn')" id="link-learn">Learn</a>
+        <a onclick="showSection('docs')" id="link-docs">API Manual</a>
+        <a href="./QueryFast-Documentation.pdf" target="_blank">Download PDF</a>
+    </div>
+</nav>
+
+<div class="container">
+    
+    <div id="home" class="section active">
+        <h1>Official<br>Showcase.</h1>
+        <p style="font-size: 1.8rem; font-weight: 500;">QueryFast: The 2.5KB Powerhouse for Reactive UI.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Reactive Todo Engine</h3>
+                <p>Pure reactivity. No virtual DOM bottlenecks. Just lightning-fast updates.</p>
+                <pre><code class="language-javascript">const state = Q.state({ list: ['Task 1'], input: '' });
+
+Q.component('Todo', () => {
+  const root = Q.add('div.todo-app');
+  Q.add('input.todo-input')
+    .on('input', el => state.value.input = el.value)
+    .appendTo(root);
+  Q.add('button').content('Add').on('click', () => {
+    state.value = { list: [...state.value.list, state.value.input], input: '' };
+  }).appendTo(root);
+  
+  Q.add('div').bind(state, s => s.list.map(t => 
+    `&lt;div class="todo-item"&gt;${t}&lt;/div&gt;`
+  ).join(''), 'html').appendTo(root);
+  return root;
+});</code></pre>
+            </div>
+            <div class="example-box">
+                <div class="example-header">Live Todo Runtime</div>
+                <div id="demo-todo" class="example-content"></div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>Component Factory</h3>
+                <p>Compose complex UIs with simple functions and custom props.</p>
+                <pre><code class="language-javascript">Q.component('Card', (props = {}) => {
+  const { title = 'Default', color = '#333' } = props;
+  return Q.add('div')
+    .ui({ bg: color, padding: '30px', borderRadius: '10px', color: '#fff' })
+    .html(`&lt;h4&gt;${title}&lt;/h4&gt;`);
+});
+
+Q.mount('Card', '#demo', { title: 'Premium', color: '#7928ca' });</code></pre>
+            </div>
+            <div class="example-box">
+                <div class="example-header">Live Component</div>
+                <div id="demo-comp" class="example-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="learn" class="section">
+        <h2>Learning the Core</h2>
+        <div class="method-card">
+            <h3>Philosophy</h3>
+            <p>QueryFast is built on the principle of **Direct DOM Reactivity**. We don't hide the DOM from you; we give the DOM "nerves" to react to state changes automatically.</p>
+        </div>
+        <div class="method-card">
+            <h3>Lifecycle</h3>
+            <ol>
+                <li><strong>Define State:</strong> <code>const s = Q.state(val)</code></li>
+                <li><strong>Create UI:</strong> <code>const el = Q.add('div')</code></li>
+                <li><strong>Bind:</strong> <code>el.bind(s, mapFn, 'text')</code></li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="docs" class="section">
+        <h2>Official API Manual</h2>
+        <p>Comprehensive documentation for every method in the QueryFast ecosystem.</p>
+
+        <h3>1. Global Functions (Q)</h3>
+        <div class="method-card">
+            <div class="method-name">Q(selector)</div>
+            <p><strong>Args:</strong> <code>string | Node | Node[] | QCollection</code></p>
+            <p><strong>Returns:</strong> <code>QCollection</code></p>
+            <p>The universal selector. Wraps results in a chainable array-like object.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Q.add(selector)</div>
+            <p><strong>Args:</strong> <code>string</code> (e.g., 'div#id.class')</p>
+            <p><strong>Returns:</strong> <code>QCollection</code> (1 element)</p>
+            <p>Creates a new element. Parses tag, ID, and classes from the string.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Q.state(initial)</div>
+            <p><strong>Args:</strong> <code>any</code></p>
+            <p><strong>Returns:</strong> <code>Proxy</code></p>
+            <p>Creates a reactive state. Use <code>state.value</code> to read/write. Use <code>state._subscribe(fn)</code> for manual observation.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Q.component(name, factory)</div>
+            <p><strong>Args:</strong> <code>string, (props) => QCollection</code></p>
+            <p>Registers a reusable UI component.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Q.use(name, props?)</div>
+            <p><strong>Returns:</strong> <code>QCollection</code></p>
+            <p>Creates an instance of a registered component.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Q.mount(name, target, props?)</div>
+            <p><strong>Returns:</strong> <code>QCollection</code></p>
+            <p>Instantiates and appends a component to the DOM.</p>
+        </div>
+
+        <h3>2. QCollection Methods</h3>
+
+        <div class="method-card">
+            <div class="method-name">.appendTo(target)</div>
+            <p><strong>Args:</strong> <code>string | Node | QCollection</code></p>
+            <p>Appends all elements in the collection to the target.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">.content(value?)</div>
+            <p><strong>Args:</strong> <code>string</code> (optional)</p>
+            <p>Getter/Setter for <code>textContent</code>. If multiple elements, getter returns the first.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">.html(value?)</div>
+            <p>Getter/Setter for <code>innerHTML</code>.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">.attr(name, value?)</div>
+            <p><strong>Value:</strong> <code>string | null | false | undefined</code></p>
+            <p>If value is <code>null/false/undefined</code>, the attribute is removed.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">.on(type, handler)</div>
+            <p><strong>Handler:</strong> <code>(el, event, meta?) => void</code></p>
+            <p>Supports <code>'hover'</code> special event. Handler for hover: <code>(el, isActive, event)</code>.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">.ui(styleObj)</div>
+            <p><strong>Shortcuts:</strong> <code>bg</code> (background), <code>text</code> (color).</p>
+            <p>Directly sets CSS properties on the style object.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">.bind(state, mapFn, mode)</div>
+            <p><strong>Modes:</strong> <code>text, html, attr, class, css</code></p>
+            <p>The bridge between state and DOM.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="./queryfast.min.js"></script>
+
+<script>
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('link-' + id)?.classList.add('active');
+        Prism.highlightAll();
+    }
+
+    // --- TODO FIX ---
+    const todoState = Q.state({ list: ['Pro Implementation', 'Official Docs'], input: '' });
+    Q.component('Todo', () => {
+        const root = Q.add('div.todo-app');
+        const input = Q.add('input.todo-input').attr('placeholder', 'Enter task...').on('input', el => {
+            todoState.value = { ...todoState.value, input: el.value };
+        }).appendTo(root);
+        
+        Q.add('button').content('Add Task').ui({ width: '100%', padding: '10px', bg: '#0070f3', text: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: '15px' }).on('click', () => {
+            if (!todoState.value.input) return;
+            todoState.value = { list: [...todoState.value.list, todoState.value.input], input: '' };
+            input[0].value = '';
+        }).appendTo(root);
+        
+        Q.add('div').bind(todoState, s => s.list.map(t => `<div class="todo-item">${t}</div>`).join(''), 'html').appendTo(root);
+        return root;
+    });
+    Q.mount('Todo', '#demo-todo');
+
+    // --- COMPOSITION FIX ---
+    Q.component('Card', (props = {}) => {
+        const { title = 'Default', color = '#333' } = props;
+        return Q.add('div')
+            .ui({ background: color, padding: '30px', borderRadius: '16px', color: '#fff', textAlign: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' })
+            .html(`<h3 style="margin:0; color:#fff;">${title}</h3><p style="margin:10px 0 0; opacity:0.8;">Premium Component</p>`);
+    });
+    Q.mount('Card', '#demo-comp', { title: 'QueryFast Pro', color: '#7928ca' });
+
+    Prism.highlightAll();
+</script>
+</body>
+</html>
