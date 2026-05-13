@@ -1,0 +1,38 @@
+{
+  "name": "queryfast",
+  "version": "1.0.0",
+  "description": "A tiny, fast, and reactive DOM manipulation library.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc",
+    "build:static": "esbuild src/index.ts --bundle --minify --outfile=dist/queryfast.min.js --format=iife --global-name=QueryFast",
+    "build:portable": "npm run build:static && node scripts/inline.js",
+    "prepublishOnly": "npm run build && npm run build:static && vitest run",
+    "dev": "servor . index.html 8080 --browse"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "esbuild": "^0.28.0",
+    "jsdom": "^29.1.1",
+    "servor": "^4.0.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}
