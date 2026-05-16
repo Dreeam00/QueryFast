@@ -1,6 +1,6 @@
 {
   "name": "queryfast",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A tiny, fast, and reactive DOM manipulation library.",
   "type": "module",
   "main": "./dist/index.js",
@@ -29,9 +29,9 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/あなたのユーザー名/QueryFast.git"
+    "url": "git+https://github.com/dreeam00/QueryFast.git"
   },
-  "homepage": "https://あなたのユーザー名.github.io/QueryFast/",
+  "homepage": "https://dreeam00.github.io/QueryFast/",
   "devDependencies": {
     "@types/node": "^25.7.0",
     "@types/prismjs": "^1.26.6",

@@ -84,4 +84,30 @@ describe('QueryFast v2.0', () => {
       expect(q.text()).toBe('updated');
     });
   });
+
+  describe('v2.1.0 Atomic Methods', () => {
+    it('add() should add classes and ID', () => {
+      const q = Q.add('div');
+      q.add('#my-id.class1.class2');
+      expect(q[0].id).toBe('my-id');
+      expect(q[0].classList.contains('class1')).toBe(true);
+      expect(q[0].classList.contains('class2')).toBe(true);
+    });
+
+    it('rm() should remove classes and ID', () => {
+      const q = Q.add('div#old-id.c1.c2');
+      q.rm('#old-id.c1');
+      expect(q[0].id).toBe('');
+      expect(q[0].classList.contains('c1')).toBe(false);
+      expect(q[0].classList.contains('c2')).toBe(true);
+    });
+
+    it('set() should overwrite identity', () => {
+      const q = Q.add('div#old.old-class');
+      q.set('#new.new-class');
+      expect(q[0].id).toBe('new');
+      expect(q[0].classList.contains('old-class')).toBe(false);
+      expect(q[0].classList.contains('new-class')).toBe(true);
+    });
+  });
 });

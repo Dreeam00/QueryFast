@@ -27,6 +27,45 @@ export class QCollection extends Array<Element> {
   }
 
   /**
+   * v2.1.0: Add classes or ID
+   * Example: .add(".active.blue") or .add("#new-id")
+   */
+  add(selector: string): this {
+    const { id, classes } = parseSelector(selector);
+    this.forEach(el => {
+      if (id) el.id = id;
+      classes.forEach(c => el.classList.add(c));
+    });
+    return this;
+  }
+
+  /**
+   * v2.1.0: Remove classes or ID
+   * Example: .rm(".active") or .rm("#old-id")
+   */
+  rm(selector: string): this {
+    const { id, classes } = parseSelector(selector);
+    this.forEach(el => {
+      if (id && el.id === id) el.id = '';
+      classes.forEach(c => el.classList.remove(c));
+    });
+    return this;
+  }
+
+  /**
+   * v2.1.0: Set classes or ID (Overwrite)
+   * Example: .set("#only-this.one-class")
+   */
+  set(selector: string): this {
+    const { id, classes } = parseSelector(selector);
+    this.forEach(el => {
+      if (id) el.id = id;
+      el.className = classes.join(' ');
+    });
+    return this;
+  }
+
+  /**
    * Set or get text content
    */
   text(value?: string): string | this {
@@ -159,6 +198,17 @@ export function Q(selector: string | Node | Node[] | QCollection): QCollection {
 }
 
 /**
+ * Common Selector Parser
+ */
+function parseSelector(selector: string) {
+  const match = selector.match(/^([a-z0-9-]+)?(?:#([a-z0-9-]+))?((?:\.[a-z0-9-]+)*)$/i);
+  if (!match) return { tag: '', id: '', classes: [] };
+  const [, tag, id, classesStr] = match;
+  const classes = classesStr ? classesStr.split('.').filter(Boolean) : [];
+  return { tag: tag || '', id: id || '', classes };
+}
+
+/**
  * Emmet-like shorthand mapping
  */
 const tagMap: Record<string, string> = {
@@ -183,19 +233,12 @@ const tagMap: Record<string, string> = {
 };
 
 Q.add = (selector: string): QCollection => {
-  // Simple CSS-like parser: tag#id.class1.class2
-  const match = selector.match(/^([a-z0-9-]+)?(?:#([a-z0-9-]+))?((?:\.[a-z0-9-]+)*)$/i);
-  if (!match) return new QCollection();
-
-  let [, tag, id, classes] = match;
-  tag = tag || 'div';
-  const realTag = tagMap[tag] || tag;
+  const { tag, id, classes } = parseSelector(selector);
+  const realTag = tagMap[tag] || tag || 'div';
   
   const el = document.createElement(realTag);
   if (id) el.id = id;
-  if (classes) {
-    classes.split('.').filter(Boolean).forEach(c => el.classList.add(c));
-  }
+  classes.forEach(c => el.classList.add(c));
   return new QCollection([el]);
 };
 

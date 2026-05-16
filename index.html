@@ -13,6 +13,13 @@
         .count-val { font-size: 1.5rem; font-weight: bold; min-width: 40px; text-align: center; }
         .btn-inc { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: transform 0.1s; }
         .btn-inc:active { transform: scale(0.95); }
+        .time-box { margin-top: 30px; padding: 20px; background: #eee; border-radius: 8px; display: inline-block; margin: 10px;}
+        .time-val { font-size: 1.2rem; color: #333; }
+        .tab-box { margin-top: 30px; background: #eee; border-radius: 8px; padding: 20px; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-buttons button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+        .tab-buttons button:hover { background: #0056b3; }
+        .tab-content { font-size: 1.2rem; color: #333; }    
     </style>
 </head>
 <body>
@@ -32,15 +39,46 @@
             return h;
         }
 
-        function counterComponent(parent) {
-            const state = Q.state(0);
+        function counterComponent(parent, num) {
+            const state = Q.state(num);
             const box = parent.el("div.counter-box");
             
             box.el("spn.count-val").bind(state, v => v, 'text');
             
             box.el("btn.btn-inc")
-               .text("Click to Count")
+               .text("+")
                .on("click", () => state.value++);
+            box.el("btn.btn-inc")
+               .text("-")
+               .on("click", () => state.value--);
+            
+            return box;
+        }
+
+        function itstime(parent) {
+            const state = Q.state(new Date().toLocaleTimeString());
+            const box = parent.el("div.time-box");
+            
+            box.el("spn.time-val").bind(state, v => v, 'text');
+            
+            setInterval(() => {
+                state.value = new Date().toLocaleTimeString();
+            }, 1000);
+            
+            return box;
+        }
+
+        function tabComponent(parent, intabs) {
+            const state = Q.state("Tab 1");
+            const box = parent.el(".tab-box");
+            
+            const tabs = intabs;
+            const tabButtons = box.el(".tab-buttons");
+            tabs.forEach(tab => {
+                tabButtons.el("button").text(tab).on("click", () => state.value = tab);
+            });
+            
+            box.el(".tab-content").bind(state, v => `Content for ${v}`, 'text');
             
             return box;
         }
@@ -48,8 +86,10 @@
         // 2. 構築
         const app = Q("#app");
         const main = app.el(hero, "QueryFast v2.0", "Minimal / Fastest / Reactive / Light");
-        main.el(counterComponent);
-
+        const timeBox = main.el(".time-box");
+        main.el(counterComponent, 10);
+        timeBox.el(itstime);
+        main.el(tabComponent, ["Tab 1", "Tab 2", "Tab 3"]);
     </script>
 </body>
 </html>
