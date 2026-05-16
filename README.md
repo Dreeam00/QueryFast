@@ -1,48 +1,53 @@
-# 📘 QueryFast
+# 🚀 QueryFast v2.0
 
-A tiny, fast, and reactive DOM manipulation library. No dependencies. Perfect for small tools and portable HTML applications.
+**「Q は DOM カーソルであり、el は DOM を生む唯一の構文である。」**
 
-## Features
+QueryFast は、超軽量・高速・直観的な DOM 操作ライブラリです。
+仮想 DOM を使わず、ブラウザのネイティブ機能を最大限に活かした「最小・最速」の UI 開発体験を提供します。
 
-- 🚀 **Lightweight**: Zero dependencies, tiny footprint (~2.5KB).
-- ⚡ **Fast**: Direct DOM manipulation without virtual DOM overhead.
-- 🔄 **Reactive**: Simple built-in state management.
-- 🧩 **Component-based**: Organize your UI into reusable parts.
-- 📦 **Portable**: Easily inline into a single HTML file.
+## 🌟 特徴
 
-## Installation
+- ⚡ **Zero Overhead**: 仮想 DOM なし。直接 DOM を操作するため、極めて高速です。
+- 🧱 **DOM Cursor Philosophy**: `Q` は常に DOM を指すカーソル。迷うことなく操作できます。
+- 🏗 **Single Syntax**: `el()` だけで要素生成もコンポーネント呼び出しも完結します。
+- 🔄 **Simple Reactive**: 組み込みの状態管理で、値の変化を即座に UI に反映。
+- 📦 **Ultra Light**: 依存関係ゼロ。単一の HTML ファイルへの埋め込みにも最適です。
+
+## 🛠 インストール
 
 ```bash
 npm install queryfast
 ```
 
-## Quick Start (Modern)
+## 🚀 クイックスタート (v2.0)
 
 ```javascript
 import { Q } from 'queryfast';
 
+// 1. Q で DOM カーソルを取得
+const app = Q("#app");
+
+// 2. el() で要素を生成して append
+const counter = app.el("div.counter");
+
+// 3. リアクティブな状態
 const count = Q.state(0);
 
-Q.add('button')
-  .content('Click me')
-  .on('click', () => count.value++)
-  .appendTo('body');
+// 4. コンポーネントの定義
+function countDisplay(parent, state) {
+  return parent.el("p")
+    .bind(state, v => `Count: ${v}`, 'text');
+}
 
-Q.add('p')
-  .bind(count, v => `Count: ${v}`, 'text')
-  .appendTo('body');
+// 5. コンポーネントの呼び出しとイベント
+counter.el(countDisplay, count);
+counter.el("btn#inc").text("+").on("click", () => count.value++);
 ```
 
-## Static Usage (Script Tag)
+## 📖 API マニュアル
 
-```html
-<script src="https://unpkg.com/queryfast/dist/queryfast.min.js"></script>
-<script>
-  const { Q } = window.QueryFast;
-  // ... your code
-</script>
-```
+詳細なドキュメントは [仕様書.md](./仕様書.md) を参照してください。
 
-## License
+## 📜 ライセンス
 
 ISC

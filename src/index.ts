@@ -4,13 +4,48 @@ export class QCollection extends Array<Element> {
     Object.setPrototypeOf(this, QCollection.prototype);
   }
 
+  /**
+   * DOM Cursor / Selector mapping
+   */
+  get parent(): Element | null {
+    return this[0] || null;
+  }
+
+  /**
+   * el("emmet") -> Create and append DOM
+   * el(fn, ...args) -> Call component
+   */
+  el(arg: string | ((parent: QCollection, ...args: any[]) => any), ...args: any[]): any {
+    if (typeof arg === 'string') {
+      const newCol = Q.add(arg);
+      newCol.appendTo(this);
+      return newCol;
+    } else if (typeof arg === 'function') {
+      return arg(this, ...args);
+    }
+    return this;
+  }
+
+  /**
+   * Set or get text content
+   */
+  text(value?: string): string | this {
+    if (value === undefined) {
+      return this[0]?.textContent || '';
+    }
+    this.forEach(el => {
+      el.textContent = value;
+    });
+    return this;
+  }
+
   appendTo(target: string | Node | QCollection): this {
     let parent: Node | null = null;
     if (typeof target === 'string') {
       parent = document.querySelector(target);
     } else if (target instanceof Node) {
       parent = target;
-    } else if (Array.isArray(target) && target[0] instanceof Node) {
+    } else if (target instanceof QCollection) {
       parent = target[0];
     }
 
@@ -21,13 +56,7 @@ export class QCollection extends Array<Element> {
   }
 
   content(value?: string): string | this {
-    if (value === undefined) {
-      return this[0]?.textContent || '';
-    }
-    this.forEach(el => {
-      el.textContent = value;
-    });
-    return this;
+    return this.text(value);
   }
 
   html(value?: string): string | this {
@@ -86,7 +115,7 @@ export class QCollection extends Array<Element> {
       const result = mapFn(val);
       switch (mode) {
         case 'text':
-          this.content(result);
+          this.text(result);
           break;
         case 'html':
           this.html(result);
@@ -129,13 +158,40 @@ export function Q(selector: string | Node | Node[] | QCollection): QCollection {
   return new QCollection();
 }
 
+/**
+ * Emmet-like shorthand mapping
+ */
+const tagMap: Record<string, string> = {
+  sec: 'section',
+  hdr: 'header',
+  btn: 'button',
+  art: 'article',
+  nav: 'nav',
+  ftr: 'footer',
+  inp: 'input',
+  txt: 'textarea',
+  lbl: 'label',
+  img: 'img',
+  spn: 'span',
+  div: 'div',
+  p: 'p',
+  h1: 'h1',
+  h2: 'h2',
+  h3: 'h3',
+  ul: 'ul',
+  li: 'li'
+};
+
 Q.add = (selector: string): QCollection => {
   // Simple CSS-like parser: tag#id.class1.class2
   const match = selector.match(/^([a-z0-9-]+)?(?:#([a-z0-9-]+))?((?:\.[a-z0-9-]+)*)$/i);
   if (!match) return new QCollection();
 
-  const [, tag, id, classes] = match;
-  const el = document.createElement(tag || 'div');
+  let [, tag, id, classes] = match;
+  tag = tag || 'div';
+  const realTag = tagMap[tag] || tag;
+  
+  const el = document.createElement(realTag);
   if (id) el.id = id;
   if (classes) {
     classes.split('.').filter(Boolean).forEach(c => el.classList.add(c));
@@ -166,24 +222,6 @@ Q.state = (initial: any) => {
   });
 
   return proxy;
-};
-
-const components: Record<string, (props?: any) => QCollection> = {};
-
-Q.component = (name: string, factory: (props?: any) => QCollection) => {
-  components[name] = factory;
-};
-
-Q.use = (name: string, props?: any): QCollection => {
-  const factory = components[name];
-  if (!factory) return new QCollection();
-  return factory(props);
-};
-
-Q.mount = (name: string, target: string | Node, props?: any): QCollection => {
-  const collection = Q.use(name, props);
-  collection.appendTo(target);
-  return collection;
 };
 
 // Global export for static usage

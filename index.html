@@ -3,53 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QueryFast Demo</title>
+    <title>QueryFast v2.0 Demo</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; max-width: 300px; }
-        .active { border-color: #007bff; box-shadow: 0 0 10px rgba(0,123,255,0.2); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; background: #f4f7f6; }
+        .hero { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 600px; margin: 0 auto; }
+        .title { font-size: 2.5rem; margin: 0 0 10px; color: #333; }
+        .sub { font-size: 1.1rem; color: #666; margin-bottom: 30px; }
+        .counter-box { display: flex; align-items: center; gap: 20px; padding: 20px; background: #eee; border-radius: 8px; }
+        .count-val { font-size: 1.5rem; font-weight: bold; min-width: 40px; text-align: center; }
+        .btn-inc { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: transform 0.1s; }
+        .btn-inc:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
-    <h1>QueryFast Static Demo</h1>
     <div id="app"></div>
 
     <!-- ライブラリの読み込み -->
     <script src="./dist/queryfast.min.js"></script>
     
     <script>
-        // 1. リアクティブな状態を作成
-        const count = Q.state(0);
-        const isHovered = Q.state(false);
+        const { Q } = window.QueryFast;
 
-        // 2. コンポーネントの定義
-        Q.component('Counter', () => {
-            const container = Q.add('div.card');
+        // 1. コンポーネントの定義 (v2.0 方式)
+        function hero(parent, title, sub) {
+            const h = Q(parent).el("sec.hero");
+            h.el("hdr.title").text(title);
+            h.el("p.sub").text(sub);
+            return h;
+        }
+
+        function counterComponent(parent) {
+            const state = Q.state(0);
+            const box = parent.el("div.counter-box");
             
-            // 状態のバインド（クラス）
-            container.bind(isHovered, (active) => ({ active }), 'class');
+            box.el("spn.count-val").bind(state, v => v, 'text');
+            
+            box.el("btn.btn-inc")
+               .text("Click to Count")
+               .on("click", () => state.value++);
+            
+            return box;
+        }
 
-            // タイトル
-            Q.add('h3').content('Counter Component').appendTo(container);
+        // 2. 構築
+        const app = Q("#app");
+        const main = app.el(hero, "QueryFast v2.0", "Minimal / Fastest / Reactive / Light");
+        main.el(counterComponent);
 
-            // カウント表示
-            Q.add('p')
-                .bind(count, (v) => `Current count: ${v}`, 'text')
-                .appendTo(container);
-
-            // ボタン
-            Q.add('button')
-                .content('Increment')
-                .ui({ bg: '#007bff', text: '#fff', border: 'none', padding: '10px', cursor: 'pointer' })
-                .on('click', () => count.value++)
-                .on('hover', (el, active) => isHovered.value = active)
-                .appendTo(container);
-
-            return container;
-        });
-
-        // 3. マウント
-        Q.mount('Counter', '#app');
     </script>
 </body>
 </html>
