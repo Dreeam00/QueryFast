@@ -10,8 +10,10 @@ QueryFast は、超軽量・高速・直観的な DOM 操作ライブラリで�
 - ⚡ **Zero Overhead**: 仮想 DOM なし。直接 DOM を操作するため、極めて高速です。
 - 🧱 **DOM Cursor Philosophy**: `Q` は常に DOM を指すカーソル。迷うことなく操作できます。
 - 🏗 **Single Syntax**: `el()` だけで要素生成もコンポーネント呼び出しも完結します。
+- ⚛️ **Atomic Identity**: `add()`, `rm()`, `set()` でクラスや ID を自在に操作。
+- ✨ **Emotional UI**: `.fx()` メソッドで JS 定義のアニメーションを atomic に実行。
 - 🔄 **Simple Reactive**: 組み込みの状態管理で、値の変化を即座に UI に反映。
-- 📦 **Ultra Light**: 依存関係ゼロ。単一の HTML ファイルへの埋め込みにも最適です。
+- 📦 **Ultra Light**: 依存関係ゼロ、**1.5KB gzipped** の極小エンジン。
 
 ## 🛠 インストール
 

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnostic Loader</title>
+</head>
+<body>
+    <h1>Check Console (F12)</h1>
+    <script src="./dist/webfast.min.js"></script>
+    <script>
+        console.log("--- DIAGNOSTIC START ---");
+        console.log("window.WebFast:", window.WebFast);
+        if (window.WebFast) {
+            console.log("window.WebFast keys:", Object.keys(window.WebFast));
+        } else {
+            console.error("CRITICAL: window.WebFast is undefined. Script load failed or bundle is broken.");
+        }
+        console.log("--- DIAGNOSTIC END ---");
+    </script>
+</body>
+</html>

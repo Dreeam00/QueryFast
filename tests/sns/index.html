@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic SNS — Individual Loading</title>
+</head>
+<body>
+
+<div id="app"></div>
+
+<!-- Load individual modules -->
+<script src="./dist/queryfast.min.js"></script>
+<script src="./dist/rootingfast.min.js"></script>
+<script src="./dist/fx.min.js"></script>
+<script src="./dist/basefast.min.js"></script>
+
+<script>
+    // Access global variables exposed by each module
+    const { Q, RootingFast, FX, BaseFast } = window;
+
+    console.log("Modules loaded:", { Q: !!Q, RootingFast: !!RootingFast, FX: !!FX, BaseFast: !!BaseFast });
+
+    // --- 1. Global Setup ---
+    Q.global(`
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: #f0f2f5; color: #1c1e21; }
+        .container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
+        nav { background: #fff; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 100; }
+        .nav-inner { height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-weight: 900; font-size: 1.5rem; color: #0070f3; text-decoration: none; }
+        .nav-links a { text-decoration: none; color: #65676b; font-weight: 600; margin-left: 20px; }
+        .card { background: #fff; border-radius: 12px; padding: 20px; margin-top: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #ddd; }
+        .user-name { font-weight: 700; text-decoration: none; color: inherit; }
+        .post-footer { display: flex; gap: 20px; border-top: 1px solid #eee; margin-top: 15px; padding-top: 10px; }
+        .action-btn { background: none; border: none; color: #65676b; font-weight: 600; cursor: pointer; }
+        .input-box { background: #fff; border-radius: 12px; padding: 20px; margin-top: 15px; }
+        textarea { width: 100%; border: none; font-size: 1.1rem; resize: none; outline: none; font-family: inherit; margin-bottom: 10px; }
+        .btn-post { background: #0070f3; color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    `);
+
+    // --- 2. Database & State ---
+    let db, postsState;
+
+    async function initApp() {
+        // OPFS 上の "atomic_sns_v3.db" ファイルに接続
+        db = await BaseFast.connect("atomic_sns_v3.db");
+        
+        if (db.all().length === 0) {
+            await db.save([
+                { id: 1, user: "Gentarou", text: "v3.0.0 BaseFast OPFS 永続化完了！", likes: 0, time: Date.now() }
+            ]);
+        }
+
+        postsState = Q.state(db.all());
+        postsState._subscribe(data => db.save(data));
+
+        // 3. Routing Start
+        RootingFast.route({ 
+            "/": (ctx, scp) => FeedPage(ctx, scp), 
+            "/profile/:id": (ctx, scp) => ProfilePage(ctx, scp) 
+        });
+    }
+
+    // --- 3. Components ---
+
+    function Navbar(parent) {
+        const root = parent.el("nav");
+        const inner = root.el("div.container.nav-inner");
+        inner.el("a").attr("href", "/").text("AtomicSNS").set(".logo");
+        const links = inner.el("div.nav-links");
+        links.el("a").attr("href", "/").text("FEED");
+        links.el("a").attr("href", "/profile/Gentarou").text("ME");
+    }
+
+    async function PostCard(parent, post) {
+        const root = parent.el("div.card");
+        const header = root.el("div.post-header");
+        header.el("div.avatar").ui({ background: `hsl(${post.user.length * 60}, 60%, 50%)` });
+        header.el("a").attr("href", `/profile/${post.user}`).text(post.user).set(".user-name");
+        root.el("div").text(post.text).ui({ fontSize: "1.1rem" });
+        const footer = root.el("div.post-footer");
+        const likeCount = Q.state(post.likes);
+        const likeBtn = footer.el("btn.action-btn");
+        likeBtn.bind(likeCount, v => `👍 ${v}`, 'text');
+        likeBtn.on("click", () => {
+            likeCount.value++;
+            postsState.value = postsState.value.map(p => p.id === post.id ? { ...p, likes: likeCount.value } : p);
+            FX.motion.shake(Q(likeBtn));
+        });
+        FX.motion.slideIn(root, { y: 10 });
+    }
+
+    // --- 4. Pages ---
+
+    async function FeedPage(ctx, scp) {
+        const app = Q("#app"); app[0].innerHTML = "";
+        app.el(Navbar);
+        const content = app.el("div.container");
+
+        const inputArea = content.el("div.input-box");
+        const area = inputArea.el("textarea").attr("placeholder", "What's happening?");
+        inputArea.el("btn").text("Post").set(".btn-post").on("click", () => {
+            if (!area[0].value) return FX.motion.shake(inputArea);
+            postsState.value = [{ id: Date.now(), user: "Gentarou", text: area[0].value, likes: 0, time: Date.now() }, ...postsState.value];
+            area[0].value = "";
+        });
+
+        const timeline = content.el("div.timeline");
+        const render = async (list) => {
+            timeline[0].innerHTML = "";
+            const results = await BaseFast.from(list).orderBy('time', 'desc').exec();
+            const cursor = Q(timeline[0]);
+            results.forEach(p => cursor.el(PostCard, p));
+        };
+        postsState._subscribe(render);
+        return () => postsState._unsubscribe(render);
+    }
+
+    async function ProfilePage(ctx, scp) {
+        const app = Q("#app"); app[0].innerHTML = "";
+        app.el(Navbar);
+        const content = app.el("div.container");
+        const user = ctx.params.id;
+        content.el("h1").text(`${user}'s Profile`).ui({ marginTop: "30px" });
+
+        const timeline = content.el("div.timeline");
+        const results = await BaseFast.from(postsState.value).where(p => p.user === user).orderBy('time', 'desc').exec();
+        const cursor = Q(timeline[0]);
+        results.forEach(p => cursor.el(PostCard, p));
+    }
+
+    // Boot App
+    initApp();
+
+</script>
+</body>
+</html>

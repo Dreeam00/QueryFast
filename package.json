@@ -1,7 +1,7 @@
 {
-  "name": "queryfast",
-  "version": "2.1.0",
-  "description": "A tiny, fast, and reactive DOM manipulation library.",
+  "name": "flexweb",
+  "version": "3.0.0",
+  "description": "The Modular Web Ecosystem: Ultra-light, no-magic, full-stack frontend framework.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -10,37 +10,47 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./base": "./dist/base.js",
+    "./rooting": "./dist/rooting.js",
+    "./fx": "./dist/fx.js"
   },
   "files": [
     "dist",
     "README.md"
   ],
   "scripts": {
-    "test": "vitest",
+    "lint": "eslint src/**/*.ts",
+    "test:debug": "vitest run tests/debugsuite/suite.ts",
     "build": "tsc",
-    "build:static": "esbuild src/index.ts --bundle --minify --outfile=dist/queryfast.min.js --format=iife --global-name=QueryFast",
-    "build:portable": "npm run build:static && node scripts/inline.js",
-    "prepublishOnly": "npm run build && npm run build:static && vitest run",
-    "dev": "servor . index.html 8080 --browse"
+    "prepublishOnly": "npm run build && vitest run"
   },
-  "keywords": [],
+  "keywords": [
+    "ui",
+    "dom",
+    "framework",
+    "modular"
+  ],
   "author": "",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dreeam00/QueryFast.git"
+    "url": "git+https://github.com/dreeam00/flexweb.git"
   },
-  "homepage": "https://dreeam00.github.io/QueryFast/",
+  "homepage": "https://dreeam00.github.io/flexweb/",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.7.0",
     "@types/prismjs": "^1.26.6",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
     "esbuild": "^0.28.0",
+    "eslint": "^10.4.0",
     "jsdom": "^29.1.1",
     "prismjs": "^1.30.0",
     "puppeteer": "^24.43.1",
-    "servor": "^4.0.2",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.3",
     "vitest": "^4.1.6"
   }
 }

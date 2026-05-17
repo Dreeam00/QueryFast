@@ -110,4 +110,27 @@ describe('QueryFast v2.0', () => {
       expect(q[0].classList.contains('new-class')).toBe(true);
     });
   });
+
+  describe('v2.2.0 Atomic Transitions', () => {
+    it('fx() should add class and return Promise', async () => {
+      const q = Q.add('div');
+      
+      // Simulate transitionend
+      setTimeout(() => {
+        q[0].dispatchEvent(new Event('transitionend'));
+      }, 10);
+
+      const result = await q.fx('.animating');
+      expect(result).toBe(q);
+      expect(q[0].classList.contains('animating')).toBe(true);
+    });
+
+    it('fx() should resolve immediately if no transition is defined', async () => {
+      const q = Q.add('div');
+      // getComputedStyle will return 0s duration in jsdom by default
+      const result = await q.fx('.no-anim');
+      expect(result).toBe(q);
+      expect(q[0].classList.contains('no-anim')).toBe(true);
+    });
+  });
 });

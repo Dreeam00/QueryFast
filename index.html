@@ -3,93 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QueryFast v2.0 Demo</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; background: #f4f7f6; }
-        .hero { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 600px; margin: 0 auto; }
-        .title { font-size: 2.5rem; margin: 0 0 10px; color: #333; }
-        .sub { font-size: 1.1rem; color: #666; margin-bottom: 30px; }
-        .counter-box { display: flex; align-items: center; gap: 20px; padding: 20px; background: #eee; border-radius: 8px; }
-        .count-val { font-size: 1.5rem; font-weight: bold; min-width: 40px; text-align: center; }
-        .btn-inc { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: transform 0.1s; }
-        .btn-inc:active { transform: scale(0.95); }
-        .time-box { margin-top: 30px; padding: 20px; background: #eee; border-radius: 8px; display: inline-block; margin: 10px;}
-        .time-val { font-size: 1.2rem; color: #333; }
-        .tab-box { margin-top: 30px; background: #eee; border-radius: 8px; padding: 20px; }
-        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-buttons button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
-        .tab-buttons button:hover { background: #0056b3; }
-        .tab-content { font-size: 1.2rem; color: #333; }    
-    </style>
+    <title>QueryFast Ecosystem SPA</title>
 </head>
 <body>
-    <div id="app"></div>
 
-    <!-- ライブラリの読み込み -->
-    <script src="./dist/queryfast.min.js"></script>
-    
-    <script>
-        const { Q } = window.QueryFast;
+<div id="app"></div>
 
-        // 1. コンポーネントの定義 (v2.0 方式)
-        function hero(parent, title, sub) {
-            const h = Q(parent).el("sec.hero");
-            h.el("hdr.title").text(title);
-            h.el("p.sub").text(sub);
-            return h;
+<!-- Entire Stack: Core + Rooting + FX -->
+<script src="./dist/queryfast.min.js"></script>
+<script src="./dist/rootingfast.min.js"></script>
+<script src="./dist/fx.min.js"></script>
+
+<script>
+    const { Q, RootingFast, FX } = window;
+
+    // --- 1. Global Setup ---
+    Q.global(`
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8f9fa; color: #1a1a1a; overflow-x: hidden;
         }
+        .nav-bar { background: #fff; border-bottom: 1px solid #ddd; padding: 20px 40px; display: flex; gap: 20px; }
+        .nav-bar a { text-decoration: none; color: #666; font-weight: 700; cursor: pointer; }
+        .nav-bar a:hover { color: #0070f3; }
+        .page { padding: 40px; max-width: 800px; margin: 0 auto; }
+    `);
 
-        function counterComponent(parent, num) {
-            const state = Q.state(num);
-            const box = parent.el("div.counter-box");
-            
-            box.el("spn.count-val").bind(state, v => v, 'text');
-            
-            box.el("btn.btn-inc")
-               .text("+")
-               .on("click", () => state.value++);
-            box.el("btn.btn-inc")
-               .text("-")
-               .on("click", () => state.value--);
-            
-            return box;
-        }
+    // --- 2. Components ---
 
-        function itstime(parent) {
-            const state = Q.state(new Date().toLocaleTimeString());
-            const box = parent.el("div.time-box");
-            
-            box.el("spn.time-val").bind(state, v => v, 'text');
-            
-            setInterval(() => {
-                state.value = new Date().toLocaleTimeString();
-            }, 1000);
-            
-            return box;
-        }
+    function Layout(parent, contentFn, ...args) {
+        const root = parent.el("div");
+        const nav = root.el("div.nav-bar");
+        nav.el("a").attr("href", "/").text("HOME");
+        nav.el("a").attr("href", "/dashboard").text("DASHBOARD");
 
-        function tabComponent(parent, intabs) {
-            const state = Q.state("Tab 1");
-            const box = parent.el(".tab-box");
-            
-            const tabs = intabs;
-            const tabButtons = box.el(".tab-buttons");
-            tabs.forEach(tab => {
-                tabButtons.el("button").text(tab).on("click", () => state.value = tab);
-            });
-            
-            box.el(".tab-content").bind(state, v => `Content for ${v}`, 'text');
-            
-            return box;
-        }
+        const page = root.el("div.page");
+        contentFn(page, ...args);
+    }
 
-        // 2. 構築
+    // --- 3. Pages ---
+
+    async function HomePage(ctx, scp) {
         const app = Q("#app");
-        const main = app.el(hero, "QueryFast v2.0", "Minimal / Fastest / Reactive / Light");
-        const timeBox = main.el(".time-box");
-        main.el(counterComponent, 10);
-        timeBox.el(itstime);
-        main.el(tabComponent, ["Tab 1", "Tab 2", "Tab 3"]);
-    </script>
+        app[0].innerHTML = "";
+        
+        app.el(Layout, (page) => {
+            const h = page.el("h1").text("RootingFast Backbone");
+            page.el("p").text("This page was routed with RootingFast. No magic, just explicit Page functions.");
+            
+            // FX Entry
+            FX.motion.slideIn(h, { y: 30 });
+        });
+    }
+
+    async function DashboardPage(ctx, scp) {
+        const app = Q("#app");
+        app[0].innerHTML = "";
+
+        app.el(Layout, (page) => {
+            page.el("h1").text("Atomic Dashboard");
+            
+            const stats = page.el("div").ui({ display: "flex", gap: "10px", marginTop: "20px" });
+            
+            // Atomic State sharing through 'scp'
+            if (!scp.visits) scp.visits = Q.state(0);
+            scp.visits.value++;
+
+            stats.el("div").ui({ background: "#fff", padding: "20px", borderRadius: "12px", border: "1px solid #ddd" })
+                .el("spn").bind(scp.visits, v => v, 'text').ui({ fontSize: "2rem", fontWeight: "800", display: "block" })
+                .parent.el("spn").text("Visits this session").ui({ fontSize: "0.8rem", opacity: "0.5" });
+
+            page.el("btn").text("Manual Reset")
+                .ui({ marginTop: "20px", padding: "10px 20px", background: "#0070f3", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" })
+                .on("click", () => scp.visits.value = 0);
+        });
+    }
+
+    // --- 4. Initialize Router ---
+    RootingFast.route({
+        "/": HomePage,
+        "/dashboard": DashboardPage
+    });
+
+</script>
 </body>
 </html>
